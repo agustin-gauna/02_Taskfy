@@ -1,9 +1,11 @@
 import React from "react";
 import { useState } from "react";
 
+import { useLocalStorage } from "../hooks/useLocalStorage";
+
 import { motion, AnimatePresence } from "framer-motion";
 
-import { Input, Textarea, Button } from "@nextui-org/react";
+import { Input, Textarea, Button, Divider } from "@nextui-org/react";
 
 import {
   Card,
@@ -65,8 +67,11 @@ const TasksContainer = ({ tasks, setTasks }) => {
     exit: { opacity: 0, y: 50, transition: { duration: 0.3 } },
   };
 
-  const [tasksCompleted, setTasksCompleted] = useState([]);
-  const [tasksDeleted, setTasksDeleted] = useState([]);
+  const [tasksCompleted, setTasksCompleted] = useLocalStorage(
+    "completedTasks",
+    []
+  );
+  const [tasksDeleted, setTasksDeleted] = useLocalStorage("deletedTasks", []);
 
   const handleDelete = (taskId) => {
     const deletedTask = tasks.find((task) => task.id === taskId);
@@ -85,17 +90,6 @@ const TasksContainer = ({ tasks, setTasks }) => {
     setTasksCompleted((prevCompleted) => [...prevCompleted, completedTask]);
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
   };
-
-  //   const handleUndo = (taskId) => {
-  //     const undoTask = tasksDeleted.find((task) => task.id === taskId);
-
-  //     if (!undoTask) return;
-
-  //     setTasks((prevTasks) => [...prevTasks, undoTask]);
-  //     setTasksDeleted((prevTasks) =>
-  //       prevTasks.filter((task) => task.id !== taskId)
-  //     );
-  //   };
 
   const handleUndo = (taskId, source) => {
     if (source === "completed") {
@@ -144,38 +138,41 @@ const TasksContainer = ({ tasks, setTasks }) => {
   return (
     <main className="flex flex-col gap-16">
       {tasks && tasks.length > 0 ? (
-        <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {tasks.map((task) => (
-            <Card key={task.id} className="w-full" shadow="sm">
-              <CardHeader className="font-rubik text-xl font-bold">
-                {task.name}
-              </CardHeader>
-              <CardHeader className="font-rubik text-xl font-bold">
-                {task.id}
-              </CardHeader>
-              <CardBody className="font-rubik ">{task.description}</CardBody>
-              <CardFooter>
-                <div className="flex gap-2 ml-auto">
-                  {/* onClick={() => handleEdit(task.id)} */}
-                  <button onClick={() => openEditModal(task)}>
-                    <img className=" w-5" src={editImg} alt="" />
-                  </button>
-
-                  <button onClick={() => handleDelete(task.id)}>
-                    <img className=" w-5" src={deleteImg} alt="" />
-                  </button>
-
-                  <button onClick={() => handleComplete(task.id)}>
-                    <img className=" w-5" src={completeImg} alt="" />
-                  </button>
+        <section className="flex flex-col gap-4">
+          <h2 className="text-[#ffffff] font-bold text-2xl">
+            Tareas pendientes
+          </h2>
+          <div className="border-b-1 border-[#fffff]"></div>
+          <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {tasks.map((task) => (
+              <Card key={task.id} className="w-full" shadow="sm">
+                <div className="font-rubik text-xl font-bold truncate p-2">
+                  {task.name}
                 </div>
-              </CardFooter>
-            </Card>
-          ))}
+                <Divider></Divider>
+                <CardBody className="font-rubik ">{task.description}</CardBody>
+                <CardFooter>
+                  <div className="flex gap-2 ml-auto">
+                    <button onClick={() => openEditModal(task)}>
+                      <img className=" w-5" src={editImg} alt="" />
+                    </button>
+
+                    <button onClick={() => handleDelete(task.id)}>
+                      <img className=" w-5" src={deleteImg} alt="" />
+                    </button>
+
+                    <button onClick={() => handleComplete(task.id)}>
+                      <img className=" w-5" src={completeImg} alt="" />
+                    </button>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+          </section>
         </section>
       ) : (
-        <div className="flex md:text-4xl w-full bg-[#141414] py-8 rounded-lg justify-center">
-          <h2 className="text-[#818181] font-medium">
+        <div className="flex md:text-4xl w-full bg-[#232323] py-8 rounded-lg justify-center">
+          <h2 className="text-[#757575] font-medium">
             No hay tareas pendientes!
           </h2>
         </div>
@@ -240,63 +237,82 @@ const TasksContainer = ({ tasks, setTasks }) => {
         )}
       </AnimatePresence>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {tasksCompleted.map((task) => (
-          <Card key={task.id} className="w-full bg-[#c3d946] " shadow="sm">
-            <CardHeader className="font-rubik text-xl font-bold text-[#121212]">
-              {task.name}
-            </CardHeader>
-            <CardHeader className="font-rubik text-xl font-bold text-[#121212]">
-              {task.id}
-            </CardHeader>
-            <CardBody className="font-rubik  text-[#121212]">
-              {task.description}
-            </CardBody>
-            <CardFooter>
-              <div className="flex gap-2 ml-auto">
-                <button
-                  onClick={() => handleDeletePermanent(task.id, "completed")}
-                >
-                  <img className=" w-5" src={deleteBlackImg} alt="" />
-                </button>
+      {tasksCompleted && tasksCompleted.length > 0 ? (
+        <section className="flex flex-col gap-4">
+          <h2 className="text-[#c3d946] font-bold text-2xl">
+            Tareas completadas
+          </h2>
 
-                <button onClick={() => handleUndo(task.id, "completed")}>
-                  <img className=" w-5" src={undoBlackImg} alt="" />
-                </button>
-              </div>
-            </CardFooter>
-          </Card>
-        ))}
-      </section>
+          <div className="border-b-1 border-[#c3d946]"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {tasksCompleted.map((task) => (
+              <Card key={task.id} className="w-full bg-[#c3d946] " shadow="sm">
+                <div className="font-rubik text-xl font-bold truncate p-2 text-[#121212]">
+                  {task.name}
+                </div>
+                <div className="border-b-1 border-[#121212]"></div>
+                <CardBody className="font-rubik  text-[#121212]">
+                  {task.description}
+                </CardBody>
+                <CardFooter>
+                  <div className="flex gap-2 ml-auto">
+                    <button
+                      onClick={() =>
+                        handleDeletePermanent(task.id, "completed")
+                      }
+                    >
+                      <img className=" w-5" src={deleteBlackImg} alt="" />
+                    </button>
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {tasksDeleted.map((task) => (
-          <Card key={task.id} className="w-full bg-[#F09152]" shadow="sm">
-            <CardHeader className="font-rubik text-xl font-bold text-[#121212]">
-              {task.name}
-            </CardHeader>
-            <CardHeader className="font-rubik text-xl font-bold text-[#121212]">
-              {task.id}
-            </CardHeader>
-            <CardBody className="font-rubik  text-[#121212]">
-              {task.description}
-            </CardBody>
-            <CardFooter>
-              <div className="flex gap-2 ml-auto">
-                <button
-                  onClick={() => handleDeletePermanent(task.id, "deleted")}
-                >
-                  <img className=" w-5" src={deleteBlackImg} alt="" />
-                </button>
+                    <button onClick={() => handleUndo(task.id, "completed")}>
+                      <img className=" w-5" src={undoBlackImg} alt="" />
+                    </button>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </section>
+      ) : (
+        ""
+      )}
 
-                <button onClick={() => handleUndo(task.id, "deleted")}>
-                  <img className=" w-5" src={undoBlackImg} alt="" />
-                </button>
-              </div>
-            </CardFooter>
-          </Card>
-        ))}
-      </section>
+      {tasksDeleted && tasksDeleted.length > 0 ? (
+        <section className="flex flex-col gap-4">
+          <h2 className="text-[#F09152] font-bold text-2xl">
+            Papelera de tareas
+          </h2>
+          <div className="border-b-1 border-[#F09152]"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {tasksDeleted.map((task) => (
+              <Card key={task.id} className="w-full bg-[#F09152]" shadow="sm">
+                <div className="font-rubik text-xl font-bold truncate p-2 text-[#121212]">
+                  {task.name}
+                </div>
+                <div className="border-b-1 border-[#121212]"></div>
+                <CardBody className="font-rubik  text-[#121212]">
+                  {task.description}
+                </CardBody>
+                <CardFooter>
+                  <div className="flex gap-2 ml-auto">
+                    <button
+                      onClick={() => handleDeletePermanent(task.id, "deleted")}
+                    >
+                      <img className=" w-5" src={deleteBlackImg} alt="" />
+                    </button>
+
+                    <button onClick={() => handleUndo(task.id, "deleted")}>
+                      <img className=" w-5" src={undoBlackImg} alt="" />
+                    </button>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </section>
+      ) : (
+        ""
+      )}
     </main>
   );
 };

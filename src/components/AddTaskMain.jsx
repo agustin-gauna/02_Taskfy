@@ -34,7 +34,7 @@ const AddTaskMain = ({ addTask }) => {
     console.log("tarea agregada");
     setTaskName("");
     setTaskDescription("");
-    // closeModal();
+    closeModal();
   };
 
   const modalVariants = {
@@ -47,11 +47,11 @@ const AddTaskMain = ({ addTask }) => {
     <main className="flex justify-center py-5 w-full mt-16">
       <Button
         color="primary"
-        className="text-[#1E1E1E] font-medium md:text-xl lg:text-2xl bg-[#A69DCA] py-8 px-6 w-full"
+        className="text-[#1E1E1E] font-medium md:text-xl lg:text-2xl bg-[#A69DCA] py-8 px-6 w-full "
         onClick={openModal}
       >
         <img className="" src={addImg} alt="" />
-        Ingresa una tarea por hacer...
+        Ingresa una tarea por hacer
       </Button>
 
       <AnimatePresence>
@@ -77,7 +77,7 @@ const AddTaskMain = ({ addTask }) => {
               </button>
 
               <h2 className="text-xl font-semibold mb-4">
-                Agregar Nueva Tarea
+                Agregar nueva tarea
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <Input
@@ -95,7 +95,6 @@ const AddTaskMain = ({ addTask }) => {
                   type="text"
                   id="taskName"
                   name="taskName"
-                  required
                   label="Descripción de la tarea"
                   labelPlacement="inside"
                   value={taskDescription}

@@ -2,11 +2,14 @@ import { useState } from "react";
 import AddTaskMain from "./components/AddTaskMain";
 import TasksContainer from "./components/TasksContainer";
 
+import { useLocalStorage } from "./hooks/useLocalStorage";
+
 import "@fontsource-variable/rubik";
 import Footer from "./components/Footer";
+import Header from "./components/Header";
 
 function App() {
-  const [tasks, setTasks] = useState([
+  const [tasks, setTasks] = useLocalStorage("tasks", [
     // {
     //   id: 1,
     //   name: "Revisar correos",
@@ -58,6 +61,7 @@ function App() {
 
   return (
     <div className="max-w-6xl flex flex-col lg:mx-auto px-5 min-h-screen gap-10">
+      <Header></Header>
       <AddTaskMain addTask={addTask}></AddTaskMain>
       <TasksContainer tasks={tasks} setTasks={setTasks}></TasksContainer>
       <Footer></Footer>
